@@ -1,71 +1,49 @@
 import './App.css';
 import React,{Component} from 'react';
-import { nanoid } from 'nanoid'
-
-
-
-/*
- * Выносим объект с примитивами в константу чтобы было удобно сбрасывать.
- * Нельзя использовать если в каком-то свойстве состояния хранится сложный тип.
- */
-let contact={
-  contactName:[],
-};
-
-
-class SignUpForm extends React.Component {
+import { v4 as uuidv4 } from 'uuid';
+import Form from './components/form'
+import ContactsList from './components/contactsList'
+class App extends Component{
   state = {
-    contacts: [],
-  name: '',
-  number: ''
+    contacts: [
+      {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
+      {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
+      {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
+      {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
+    ],
+    filter: '',
+    name: '',
+    number: ''
+  }
+  formSubmitHandler = data => {
+    this.repeatControl(data);
   };
-
-  /* ... */
-  // input change
-onChangeInput= e =>{
-  e.preventDefault();
-this.setState({name:e.target.value})
-
-}
-// formChange
-SubmitForm = e =>{
-  e.preventDefault();
-this.props.onSubmit(this.state.name)
-this.contact
-
-
-}
-itemid = nanoid(10)
-
-  render() {
-    const {name}=this.state;
-    
-    return (
+  deleteItem= Id =>{
+   this.setState(prevState=>({
+     contacts:prevState.contacts.filter(contact=>contact.id!==Id)
+   }))
+  }
+  repeatControl = data => {
+    let nameArray = [];
+    nameArray = this.state.contacts.map(cur => cur.name);
+    if (!nameArray.includes(data.name)) {
+      let arrayCont = [];
+      arrayCont = [
+        ...this.state.contacts,
+        { id:  uuidv4(), name: data.name, number: data.number },
+      ];
+      return this.setState({ ...this.state, contacts: arrayCont });
+    } else {
+      alert(' Контакт вже є у телефонній книзі!!!');
+    }
+  };
+  render(){
+    return(
       <div>
-      <form onSubmit={this.SubmitForm}>
-      <input
-      onChange={this.onChangeInput}
-      type="tel"
-      name="number"
-      pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-      title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-      required
-    />    
-<button type='submit'>send</button>
-       </form>
-       <ul>
-             <li>
-    
-     <p>{name}</p>
-             </li>
-         
-       </ul>
-            </div>
-
-      );
+      <Form onSubmitData={this.formSubmitHandler}/>
+      <ContactsList contacts={this.state.contacts} onDeleteItem={this.deleteItem} />
+      </div>
+    );
   }
 }
-
-
-
-export default SignUpForm;
+export default App;
